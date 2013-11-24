@@ -4,6 +4,7 @@ import android.app.FragmentManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.location.Criteria;
 import android.location.Location;
 //import android.location.LocationListener;
@@ -22,13 +23,14 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
-//import android.widget.TextView;
 
 public class collectTab extends Fragment implements GooglePlayServicesClient.ConnectionCallbacks,
                                                     GooglePlayServicesClient.OnConnectionFailedListener,
@@ -36,15 +38,16 @@ public class collectTab extends Fragment implements GooglePlayServicesClient.Con
 
 	private SupportMapFragment fragment;
 	private GoogleMap map;
-    private double lat = 0;
-    private double lng = 0;
-    private LatLng myPos =new LatLng(lat,lng);
+    private double currentLat = 0;
+    private double currentLng = 0;
+    private double prevLat = 0;
+    private double prevLng = 0;
+    private LatLng myPos =new LatLng(currentLat,currentLng);
     private Marker myPosMarker;
     LocationRequest mLocationRequest;
     private LocationClient locationclient;
     private Context  myCxt;
-    private Intent mIntentService;
-    private PendingIntent mPendingIntent;
+    private Polyline myPath = null;
     
     private static final int MILLISECONDS_PER_SECOND = 1000;
     public static final int UPDATE_INTERVAL_IN_SECONDS = 5;
@@ -66,7 +69,6 @@ public class collectTab extends Fragment implements GooglePlayServicesClient.Con
 		super.onActivityCreated(savedInstanceState);
 		android.support.v4.app.FragmentManager fm = getChildFragmentManager();
 		fragment = (SupportMapFragment) fm.findFragmentById(R.id.mapView);
-//		myPos = new LatLng(0,0);
 		if (fragment == null) {
 		    fragment = SupportMapFragment.newInstance();
 		    fm.beginTransaction().replace(R.id.mapView, fragment).commit();
@@ -88,23 +90,7 @@ public class collectTab extends Fragment implements GooglePlayServicesClient.Con
 		 mLocationRequest = LocationRequest.create();
 	     mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 	     mLocationRequest.setInterval(UPDATE_INTERVAL);
-	     mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
-	 	 // Getting LocationManager object from System Service LOCATION_SERVICE
-//         LocationManager locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-//
-//         // Creating a criteria object to retrieve provider
-//         Criteria criteria = new Criteria();
-//
-//         // Getting the name of the best provider
-//         String provider = locationManager.getBestProvider(criteria, true);
-//
-//         // Getting Current Location
-//         Location location = locationManager.getLastKnownLocation(provider);
-//
-//         if(location!=null){
-//                 onLocationChanged(location);
-//         }
-	
+	     mLocationRequest.setFastestInterval(FASTEST_INTERVAL);	
 	}
 
 	@Override
@@ -115,23 +101,32 @@ public class collectTab extends Fragment implements GooglePlayServicesClient.Con
 
 	@Override
 	public void onLocationChanged(Location location) {
-		lat = location.getLatitude();
-	    lng = location.getLongitude();
-	    myPos = new LatLng(lat,lng);
+		prevLat = currentLat;
+		prevLng = currentLng;
+		currentLat = location.getLatitude();
+		currentLng = location.getLongitude();
+	    myPos = new LatLng(currentLat,currentLng);
 	    if ( myCxt != null )
-	    	Toast.makeText(myCxt, "GOT MAP "+String.valueOf(lat) + " "+ String.valueOf(lat), Toast.LENGTH_LONG).show();
+	    	Toast.makeText(myCxt, "GOT MAP "+String.valueOf(currentLat) + " "+ String.valueOf(currentLng), Toast.LENGTH_LONG).show();
 		if (map == null) {
 		    map = fragment.getMap();
-	//	    Toast.makeText(getActivity(), "GOT MAP "+String.valueOf(lat) + " "+ String.valueOf(lat), Toast.LENGTH_LONG).show();
 	        myPosMarker = map.addMarker(new MarkerOptions().position(myPos).title("Your position"));
 	        myPosMarker.setDraggable(true);
 	        myPosMarker.showInfoWindow();
 	        map.moveCamera(CameraUpdateFactory.newLatLngZoom(myPos, 15));
-	//        map.animateCamera(CameraUpdateFactory.zoomTo(10), 2000, null); 
 		}
 		else{
 			myPosMarker.setPosition(myPos);
 		}
+		if (((prevLat != 0) && (prevLng != 0) && (currentLat != 0) &&(currentLng != 0)) &&
+			 (prevLat != currentLat) && (prevLng != currentLng) )
+		{	
+			myPath = map.addPolyline(new PolylineOptions()
+								.add(new LatLng(prevLat, prevLng), new LatLng(currentLat, currentLng))
+								.width(5)
+								.color(Color.BLUE));
+			myPath.setVisible(true);
+		}	
 	}
 
 
