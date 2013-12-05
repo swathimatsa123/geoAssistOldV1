@@ -9,5 +9,10 @@
     <string name="collectTxt">Collection</string>
     <string name="viewTxt">View</string>
     <string name="syncTxt">Sync</string>
+    <string name="lcEditTxt">Correct Location</string>
+    <string name="picBtnStr">Picture</string>
+    <string name="mapType">Map Layer</string>
+    <string name="okBtn">OK</string>
+    <string name="cnclBtn">Cancel</string>
 
 </resources>

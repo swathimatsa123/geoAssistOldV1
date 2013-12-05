@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <Button
+        android:id="@+id/gpsOk"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="75dp"
+        android:layout_marginTop="193dp"
+        android:text="@string/okBtn" />
+
+    <Button
+        android:id="@+id/gpsCncl"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/gpsOk"
+        android:layout_alignBottom="@+id/gpsOk"
+        android:layout_toRightOf="@+id/gpsOk"
+        android:text="@string/cnclBtn" />
+
+    <EditText
+        android:id="@+id/lngTxt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/gpsCncl"
+        android:layout_alignLeft="@+id/gpsOk"
+        android:layout_marginBottom="20dp"
+        android:ems="10"
+        android:inputType="text|number" />
+
+    <EditText
+        android:id="@+id/latTxt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/lngTxt"
+        android:layout_alignLeft="@+id/lngTxt"
+        android:layout_marginBottom="44dp"
+        android:ems="10"
+        android:inputType="text|number" >
+
+        <requestFocus />
+    </EditText>
+
+</RelativeLayout>

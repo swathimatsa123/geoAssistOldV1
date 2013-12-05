@@ -1,5 +1,6 @@
 package com.geoassist;
 
+import java.io.File;
 import java.util.Locale;
 
 import com.geoassist.syncTab;
@@ -8,7 +9,10 @@ import com.geoassist.collectTab;
 
 import android.app.ActionBar;
 import android.app.FragmentTransaction;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -40,7 +44,10 @@ public class MainActivity extends FragmentActivity implements
 	 * The {@link ViewPager} that will host the section contents.
 	 */
 	ViewPager mViewPager;
-
+	public Fragment collectTab = null;
+	public Fragment syncTab = null;
+	public Fragment viewTab = null;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -107,6 +114,17 @@ public class MainActivity extends FragmentActivity implements
 			FragmentTransaction fragmentTransaction) {
 	}
 
+	public void invokeCamera()
+	{
+    	Intent mIntent= new Intent(this, MainActivity.class);
+        mIntent.setPackage("com.google.android.camera");
+        mIntent.setAction(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+        mIntent.putExtra("output", Uri.fromFile(new File(Environment
+                .getExternalStorageDirectory(), "/myImage" + ".jpg")));        	
+        startActivityForResult(mIntent, 100);
+	}
+
+
 	/**
 	 * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
 	 * one of the sections/tabs/pages.
@@ -126,12 +144,15 @@ public class MainActivity extends FragmentActivity implements
 			switch (position){
 			case 0:
 				fragment = new collectTab();
+				collectTab = fragment;
 				break;
 			case 1:
 				fragment = new viewTab();
+				viewTab = fragment;
 				break;
 			case 2:
 				fragment = new syncTab();
+				syncTab = fragment;
 				break;
 
 			}
