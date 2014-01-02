@@ -114,17 +114,20 @@ public class MainActivity extends FragmentActivity implements
 			FragmentTransaction fragmentTransaction) {
 	}
 
-	public void invokeCamera()
-	{
-    	Intent mIntent= new Intent(this, MainActivity.class);
-        mIntent.setPackage("com.google.android.camera");
-        mIntent.setAction(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-        mIntent.putExtra("output", Uri.fromFile(new File(Environment
-                .getExternalStorageDirectory(), "/myImage" + ".jpg")));        	
-        startActivityForResult(mIntent, 100);
-	}
-
-
+//	public void invokeCamera()
+//	{
+//    	Intent mIntent= new Intent(this, MainActivity.class);
+//        mIntent.setPackage("com.google.android.camera");
+//        mIntent.setAction(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+//        mIntent.putExtra("output", Uri.fromFile(new File(Environment
+//                .getExternalStorageDirectory(), "/myImage" + ".jpg")));        	
+//        startActivityForResult(mIntent, 100);
+//	}
+//
+//	@Override
+//	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+//	   super.onActivityResult(requestCode, resultCode, data);
+//	}
 	/**
 	 * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
 	 * one of the sections/tabs/pages.

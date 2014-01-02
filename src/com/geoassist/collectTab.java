@@ -1,13 +1,17 @@
 package com.geoassist;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.util.Log;
 import android.view.View.OnClickListener;
 import android.content.Intent;
 import android.graphics.Color;
@@ -20,6 +24,7 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
@@ -79,6 +84,7 @@ public class collectTab extends Fragment implements GooglePlayServicesClient.Con
     private Button picBtn = null;
     private Spinner mapTypeSpn = null;
     private	Boolean ignoreGps = false; 
+    private File mediaFile=null;
     @Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		rootView = inflater.inflate(R.layout.collect_tab,container, false);
@@ -231,35 +237,90 @@ public class collectTab extends Fragment implements GooglePlayServicesClient.Con
 		// TODO Auto-generated method stub
 		switch(v.getId()){
         case R.id.lcEdit:
-//        	Toast.makeText(myCxt, "GPS EditBtn clicked", Toast.LENGTH_LONG).show();
         	showGpsDialog();
         	break;
         case R.id.mapType:
-        	Toast.makeText(myCxt, "Map Type Btn clicked", Toast.LENGTH_LONG).show();
+//        	Toast.makeText(myCxt, "Map Type Btn clicked", Toast.LENGTH_LONG).show();
         	break;
         case R.id.picBtn:
-//        	MainActivity  ma = (MainActivity)getActivity();
-        	Toast.makeText(myCxt, "Pic Btn clicked", Toast.LENGTH_LONG).show();
-//        	ma.invokeCamera();
+        	MainActivity  ma = (MainActivity)getActivity();
+        	if (ma != null){
+        		invokeCamera();
+        	}
             break;
 		}
 		
 	}
-//    @Override
-//    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        super.onActivityResult(requestCode, resultCode, data);
-//    }
 
+	public void invokeCamera()
+	{
+    	Intent mIntent= new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+    	mIntent.putExtra(MediaStore.EXTRA_OUTPUT, getOutputMediaFileUri()); // set the image file name
+    	startActivityForResult(mIntent, 100);
+	}
+	
+	@Override
+	  public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		   Toast.makeText(myCxt, "Activity completed", Toast.LENGTH_LONG).show();
+	        if (resultCode == Activity.RESULT_OK) {
+	            // Image captured and saved to fileUri specified in the Intent
+	        	galleryAddPic();
+	        	if (data != null){ 
+	            	Toast.makeText(myCxt, "Image saved to:" +
+	                     data.getData()+"---", Toast.LENGTH_LONG).show();
+	            }
+	        } else if (resultCode == Activity.RESULT_CANCELED) {
+	        	Toast.makeText(myCxt, "Cancelled Activity:" , Toast.LENGTH_LONG).show();
+	        } else {
+	        	Toast.makeText(myCxt, "Failed Activity:" , Toast.LENGTH_LONG).show();
+	        }
+	}
 
+	private void galleryAddPic() {
+	    Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+	    Uri contentUri = Uri.fromFile(mediaFile);
+	    mediaScanIntent.setData(contentUri);
+	    getActivity().sendBroadcast(mediaScanIntent);
+	   
+	    Log.e(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI.toString(),"URI1");
+	    Log.e(contentUri.toString(),"URI2");
+//	    Intent glryIntent = new Intent(Intent.ACTION_VIEW,  android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI); 
+//	    Intent glryIntent = new Intent(Intent.ACTION_VIEW,  contentUri); 
+//	    glryIntent.setData(contentUri);
+//	    startActivity(glryIntent);
+	    Intent editIntent = new Intent(Intent.ACTION_EDIT);
+	    editIntent.setDataAndType(contentUri, "image/*");
+	    editIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+	    startActivity(Intent.createChooser(editIntent, null));
+	}
+	
+	private Uri getOutputMediaFileUri(){
+	      return Uri.fromFile(getOutputMediaFile());
+	}
+
+	/** Create a File for saving an image or video */
+	private File getOutputMediaFile(){
+
+		   File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
+		              Environment.DIRECTORY_PICTURES), "GeoAssist");
+		    if (! mediaStorageDir.exists()){
+		        if (! mediaStorageDir.mkdirs()){
+		            Log.d("GeoAssist", "failed to create directory");
+		            return null;
+		        }
+		    }
+
+		    // Create a media file name
+		    String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+		    mediaFile = new File(mediaStorageDir.getPath() + File.separator +"geoAssist_"+ timeStamp + ".jpg");
+//		    Log.e("FileName" , "Return File:" + mediaStorageDir.getPath()+ File.separator  + "geoAssist_" + timeStamp + ".jpg");
+	    return mediaFile;
+	}
+	
 	@Override
 	public void onItemSelected(AdapterView<?> parent, View view, int pos,
 			long id) {
-		// TODO Auto-generated method stub
-		// Spinner code here
 		int mapType = 0;
-		Toast.makeText(parent.getContext(), 
-				"OnItemSelectedListener : " + parent.getItemAtPosition(pos).toString()+ " "+String.valueOf(id),
-				Toast.LENGTH_SHORT).show();
 		if (map != null) {
 			switch ((int)id){
 			case 0:
@@ -305,15 +366,5 @@ public class collectTab extends Fragment implements GooglePlayServicesClient.Con
 	    myPosMarker.setDraggable(true);
 	    myPosMarker.showInfoWindow();
 	    map.moveCamera(CameraUpdateFactory.newLatLngZoom(myPos, 15));
-//		}
-//		else{
-//			LatLng currentLoc  = myPosMarker.getPosition();
-//			myPosMarker.setPosition(myPos);
-//			LatLng newLoc  = myPosMarker.getPosition();
-//			
-//			Toast.makeText(getActivity(), "Old GPS Loc: " + currentLoc.toString()+" NewLoc : "+ newLoc.toString(), Toast.LENGTH_SHORT).show();
-//	    	
-//		}
-
     }
 }
